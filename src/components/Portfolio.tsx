@@ -15,16 +15,62 @@ const Portfolio = () => {
   const heroRef = useRef<HTMLElement>(null);
   const observerRef = useRef<IntersectionObserver | null>(null);
   const trailsRef = useRef<HTMLDivElement[]>([]);
+  const [activeCategory, setActiveCategory] = useState('all');
+  const [visibleSections, setVisibleSections] = useState<Set<string>>(new Set());
+  const [scrollDirection, setScrollDirection] = useState<'up' | 'down'>('down');
+  const lastScrollY = useRef(0);
+  
+  // Typing animation state
+  const [typedText, setTypedText] = useState('');
+  const [isTyping, setIsTyping] = useState(true);
+  const fullText = "Front-End Developer";
+  const typingSpeed = 80; // milliseconds per character - faster
 
   // Define your skills data
   const skills = [
     { name: "HTML/CSS", level: 95, icon: "fab fa-html5" },
     { name: "JavaScript", level: 88, icon: "fab fa-js" },
-    { name: "Java", level: 85, icon: "fab fa-java" },
-    { name: "PHP", level: 80, icon: "fab fa-php" },
-    { name: "C", level: 75, icon: "fas fa-code" },
+    { name: "React", level: 85, icon: "fab fa-react" },
     { name: "GIT", level: 90, icon: "fab fa-git-alt" }
   ];
+
+  // Define project categories
+  const categories = [
+    { id: 'all', name: 'All' },
+    { id: 'react', name: 'React' },
+    { id: 'java', name: 'Java' },
+    { id: 'html', name: 'HTML/CSS' },
+  ];
+
+  // Define projects with categories
+  const projects = [
+    {
+      title: "MK Inventory Ledger",
+      description: "A React-based inventory system that helps stores track expenses, stocks, and sales.",
+      image: "/src/imgs/Inventory-Management.png",
+      category: "react",
+      link: "#"
+    },
+    {
+      title: "Event Management System",
+      description: "A Java application to help users track and manage their upcoming events.",
+      image: "/src/imgs/Event-Management.png",
+      category: "java",
+      link: "#"
+    },
+    {
+      title: "Robux Store",
+      description: "A website built with HTML/CSS for displaying pricelists in Robux and gamepasses.",
+      image: "/src/imgs/Robux-Store.png",
+      category: "html",
+      link: "#"
+    }
+  ];
+
+  // Filter projects based on active category
+  const filteredProjects = activeCategory === 'all' 
+    ? [...projects] 
+    : projects.filter(project => project.category === activeCategory);
 
   // Handle scroll for header transparency
   useEffect(() => {
@@ -45,30 +91,50 @@ const Portfolio = () => {
     setIsMenuOpen(false);
   };
 
-  // Intersection Observer for fade-in animations
   useEffect(() => {
-    const observerOptions = {
-      threshold: 0.1,
-      rootMargin: '0px 0px -50px 0px'
+    const handleScroll = () => {
+      const currentScrollY = window.scrollY;
+      const direction = currentScrollY < lastScrollY.current ? 'up' : 'down';
+      setScrollDirection(direction);
+      lastScrollY.current = currentScrollY;
     };
 
-    observerRef.current = new IntersectionObserver((entries) => {
-      entries.forEach(entry => {
-        if (entry.isIntersecting) {
-          entry.target.classList.add('active');
-        }
-      });
-    }, observerOptions);
-
-    const fadeElements = document.querySelectorAll('.fade-in');
-    fadeElements.forEach(el => observerRef.current?.observe(el));
-
-    return () => {
-      if (observerRef.current) {
-        observerRef.current.disconnect();
-      }
-    };
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    return () => window.removeEventListener('scroll', handleScroll);
   }, []);
+
+  useEffect(() => {
+    // Initialize Intersection Observer with improved options
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            setVisibleSections((prev) => new Set(prev).add(entry.target.id));
+          } else {
+            // Only remove the section from visible sections if scrolling up
+            if (scrollDirection === 'up') {
+              setVisibleSections((prev) => {
+                const newSet = new Set(prev);
+                newSet.delete(entry.target.id);
+                return newSet;
+              });
+            }
+          }
+        });
+      },
+      {
+        threshold: 0.1,
+        rootMargin: '0px 0px -50px 0px'
+      }
+    );
+
+    // Observe all sections
+    document.querySelectorAll('section[id]').forEach((section) => {
+      observer.observe(section);
+    });
+
+    return () => observer.disconnect();
+  }, [scrollDirection]);
 
   // Intersection Observer for skills animation
   useEffect(() => {
@@ -115,6 +181,22 @@ const Portfolio = () => {
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
+
+  // Typing animation effect
+  useEffect(() => {
+    if (!isTyping) return;
+
+    const typeText = () => {
+      if (typedText.length < fullText.length) {
+        setTypedText(fullText.slice(0, typedText.length + 1));
+      } else {
+        setIsTyping(false);
+      }
+    };
+
+    const typingInterval = setInterval(typeText, typingSpeed);
+    return () => clearInterval(typingInterval);
+  }, [typedText, isTyping, fullText, typingSpeed]);
 
   // Handle cursor movement and trail effect
   useEffect(() => {
@@ -206,6 +288,11 @@ const Portfolio = () => {
     return () => clearInterval(particleInterval);
   }, []);
 
+  // Handle category change
+  const handleCategoryChange = (categoryId: string) => {
+    setActiveCategory(categoryId);
+  };
+
   return (
     <div className="portfolio">
       {/* Custom Cursor */}
@@ -244,14 +331,21 @@ const Portfolio = () => {
         className="hero-parallax"
       >
         <div className="hero-overlay"></div>
-        <section id="home" className="hero" ref={heroRef}>
+        <section 
+          id="home" 
+          className={`hero ${visibleSections.has('home') ? 'visible' : ''} ${scrollDirection === 'up' ? 'scroll-up' : ''}`}
+          ref={heroRef}
+        >
           <div className="hero-grid">
             <div className="hero-text">
               <div className="hero-intro">
                 <span className="greeting">Hello, I'm</span>
-                <h1 className="hero-title">Your Name</h1>
+                <h1 className="hero-title">Miss Ko Na Siya</h1>
                 <div className="hero-subtitle">
-                  <span className="typed-text">Front-End Developer</span>
+                  <span className="typed-text">
+                    {typedText}
+                    <span className="cursor-blink">|</span>
+                  </span>
                 </div>
               </div>
               <p className="hero-description">
@@ -265,11 +359,14 @@ const Portfolio = () => {
                 <a href="#contact" onClick={() => scrollToSection('contact')} className="cta-button secondary">
                   Let's Talk
                 </a>
+                <a href="/path-to-your-cv.pdf" className="cta-button cv-button" target="_blank" rel="noopener noreferrer">
+                  Download CV
+                </a>
               </div>
             </div>
             <div className="hero-image">
               <div className="profile-image">
-                <img src="your-photo.jpg" alt="Your Name" className="profile-photo" />
+                <img src="/src/imgs/toge.png" alt="Your Name" className="profile-photo" />
                 <div className="image-decoration"></div>
               </div>
               <div className="tech-stack">
@@ -289,16 +386,19 @@ const Portfolio = () => {
       </Parallax>
 
       {/* About Section with improved skills display */}
-      <section id="about" className="about">
+      <section 
+        id="about" 
+        className={`about ${visibleSections.has('about') ? 'visible' : ''} ${scrollDirection === 'up' ? 'scroll-up' : ''}`}
+      >
         <div className="container">
           <h2 className="fade-in section-title">About Me</h2>
           <div className="about-content">
             <div className="fade-in about-text">
-              <p>Hello! I'm a passionate Computer Science student with a deep interest in software development, web technologies, and emerging tech trends. My journey in programming started during my first year, and since then, I've been constantly learning and building projects.</p>
+              <p>Hello! I'm an IT student at Bicol University with a growing passion for front-end development and crafting clean, user-friendly interfaces. Since diving into web development, I've been excited by how design and code come together to create seamless digital experiences.</p>
               <br />
-              <p>I believe in writing clean, efficient code and creating user-centered solutions. Whether it's developing a web application, designing algorithms, or exploring machine learning, I approach each challenge with curiosity and determination.</p>
+              <p>I specialize in building responsive, accessible web apps using HTML, CSS, JavaScript, and modern frameworks like React. I enjoy turning ideas into interactive, intuitive interfaces that not only look good but also function smoothly.</p>
               <br />
-              <p>When I'm not coding, you'll find me reading tech blogs, contributing to open-source projects, or experimenting with new frameworks and tools. I'm always excited to collaborate on interesting projects and learn from fellow developers.</p>
+              <p>I'm always learning — whether it's experimenting with UI libraries, exploring new tools like Vite or Tailwind CSS, or keeping up with the latest front-end trends. Outside of coding, I enjoy reading tech blogs, joining dev communities, and collaborating with others on meaningful projects.</p>
             </div>
             <div className="fade-in skills-container">
               <h3 className="skills-title">Technical Skills</h3>
@@ -326,7 +426,10 @@ const Portfolio = () => {
       </section>
 
       {/* Services Section with fixed styling */}
-      <section id="services" className="services">
+      <section 
+        id="services" 
+        className={`services ${visibleSections.has('services') ? 'visible' : ''} ${scrollDirection === 'up' ? 'scroll-up' : ''}`}
+      >
         <div className="container">
           <h2 className="fade-in section-title">What I Do</h2>
           <div className="services-grid">
@@ -356,40 +459,55 @@ const Portfolio = () => {
       </section>
 
       {/* Projects Section */}
-      <section id="projects" className="projects">
+      <section 
+        id="projects" 
+        className={`projects ${visibleSections.has('projects') ? 'visible' : ''} ${scrollDirection === 'up' ? 'scroll-up' : ''}`}
+      >
         <div className="container">
           <h2 className="fade-in section-title">Featured Projects</h2>
+          <div className="project-categories">
+            {categories.map(category => (
+              <button
+                key={category.id}
+                className={`category-btn ${activeCategory === category.id ? 'active' : ''}`}
+                onClick={() => handleCategoryChange(category.id)}
+              >
+                {category.name}
+              </button>
+            ))}
+          </div>
           <div className="projects-grid">
-            <div className="fade-in project-card">
-              <div className="project-image">E-Learning Platform</div>
-              <div className="project-content">
-                <h3 className="project-title">University Learning System</h3>
-                <p className="project-description">A comprehensive e-learning platform built with React and Node.js, featuring course management, video streaming, and progress tracking for students and instructors.</p>
-                <a href="#" className="project-link">View Project →</a>
+            {filteredProjects.map((project, index) => (
+              <div key={index} className="fade-in project-card">
+                <div className="project-image">
+                  {project.image.startsWith('/') ? (
+                    <img src={project.image} alt={project.title} className="project-img" />
+                  ) : (
+                    <div className="project-placeholder">{project.image}</div>
+                  )}
+                </div>
+                <div className="project-content">
+                  <h3 className="project-title">{project.title}</h3>
+                  <p className="project-description">{project.description}</p>
+                  <a href={project.link} className="project-link">View Project →</a>
+                </div>
               </div>
-            </div>
-            <div className="fade-in project-card">
-              <div className="project-image">Task Manager App</div>
-              <div className="project-content">
-                <h3 className="project-title">Smart Task Manager</h3>
-                <p className="project-description">A productivity application with AI-powered task prioritization, built using React Native for mobile and featuring real-time synchronization across devices.</p>
-                <a href="#" className="project-link">View Project →</a>
-              </div>
-            </div>
-            <div className="fade-in project-card">
-              <div className="project-image">Data Visualization</div>
-              <div className="project-content">
-                <h3 className="project-title">COVID-19 Analytics Dashboard</h3>
-                <p className="project-description">An interactive data visualization dashboard using D3.js and Python Flask, providing real-time insights and trends analysis for COVID-19 statistics.</p>
-                <a href="#" className="project-link">View Project →</a>
-              </div>
-            </div>
+            ))}
+            {/* Add empty cards to maintain grid layout when filtered */}
+            {filteredProjects.length % 3 !== 0 && 
+              Array.from({ length: 3 - (filteredProjects.length % 3) }).map((_, index) => (
+                <div key={`empty-${index}`} className="project-card empty" style={{ visibility: 'hidden' }}></div>
+              ))
+            }
           </div>
         </div>
       </section>
 
       {/* Contact Section with improved styling */}
-      <section id="contact" className="contact">
+      <section 
+        id="contact" 
+        className={`contact ${visibleSections.has('contact') ? 'visible' : ''} ${scrollDirection === 'up' ? 'scroll-up' : ''}`}
+      >
         <div className="container">
           <div className="contact-content">
             <h2 className="fade-in section-title">Let's Connect</h2>
@@ -446,9 +564,6 @@ const Portfolio = () => {
             <a href="https://github.com/yourusername" className="social-link" target="_blank" rel="noopener noreferrer">
               <i className="fab fa-github"></i>
             </a>
-            <a href="https://twitter.com/yourhandle" className="social-link" target="_blank" rel="noopener noreferrer">
-              <i className="fab fa-twitter"></i>
-            </a>
             <a href="https://instagram.com/yourprofile" className="social-link" target="_blank" rel="noopener noreferrer">
               <i className="fab fa-instagram"></i>
             </a>
@@ -456,7 +571,7 @@ const Portfolio = () => {
               <i className="fas fa-envelope"></i>
             </a>
           </div>
-          <p>&copy; 2025 Your Name. Built with passion and lots of coffee ☕</p>
+          <p>&copy; 2025 Sec. Built with passion and lots of coffee ☕</p>
         </div>
       </footer>
     </div>
