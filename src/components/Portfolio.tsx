@@ -20,11 +20,17 @@ const Portfolio = () => {
   const [scrollDirection, setScrollDirection] = useState<'up' | 'down'>('down');
   const lastScrollY = useRef(0);
   
-  // Typing animation state
+  // Advanced typing animation state
   const [typedText, setTypedText] = useState('');
   const [isTyping, setIsTyping] = useState(true);
-  const fullText = "Front-End Developer";
-  const typingSpeed = 80; // milliseconds per character - faster
+  const [isDeleting, setIsDeleting] = useState(false);
+  const [currentTextIndex, setCurrentTextIndex] = useState(0);
+  const [displayTime, setDisplayTime] = useState(0);
+  
+  const texts = ["Front-End Developer", "Roblox Scripter"];
+  const typingSpeed = 70; // milliseconds per character
+  const deletingSpeed = 40; // milliseconds per character (faster deletion)
+  const pauseTime = 2000; // 3 seconds pause
 
   // Define your skills data
   const skills = [
@@ -182,21 +188,46 @@ const Portfolio = () => {
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
-  // Typing animation effect
+  // Advanced typing animation effect
   useEffect(() => {
-    if (!isTyping) return;
-
-    const typeText = () => {
-      if (typedText.length < fullText.length) {
-        setTypedText(fullText.slice(0, typedText.length + 1));
+    const currentText = texts[currentTextIndex];
+    
+    if (isTyping) {
+      // Typing phase
+      if (typedText.length < currentText.length) {
+        const timer = setTimeout(() => {
+          setTypedText(currentText.slice(0, typedText.length + 1));
+        }, typingSpeed);
+        return () => clearTimeout(timer);
       } else {
+        // Finished typing, start pause
         setIsTyping(false);
+        setDisplayTime(0);
       }
-    };
-
-    const typingInterval = setInterval(typeText, typingSpeed);
-    return () => clearInterval(typingInterval);
-  }, [typedText, isTyping, fullText, typingSpeed]);
+    } else if (!isDeleting && displayTime < pauseTime) {
+      // Pause phase - keep text visible
+      const timer = setTimeout(() => {
+        setDisplayTime(prev => prev + 100);
+      }, 100);
+      return () => clearTimeout(timer);
+    } else if (!isDeleting && displayTime >= pauseTime) {
+      // Start deleting
+      setIsDeleting(true);
+    } else if (isDeleting) {
+      // Deleting phase
+      if (typedText.length > 0) {
+        const timer = setTimeout(() => {
+          setTypedText(typedText.slice(0, -1));
+        }, deletingSpeed);
+        return () => clearTimeout(timer);
+      } else {
+        // Finished deleting, move to next text
+        setIsDeleting(false);
+        setCurrentTextIndex((prevIndex) => (prevIndex + 1) % texts.length);
+        setIsTyping(true);
+      }
+    }
+  }, [typedText, isTyping, isDeleting, currentTextIndex, displayTime, texts, typingSpeed, deletingSpeed, pauseTime]);
 
   // Handle cursor movement and trail effect
   useEffect(() => {
@@ -340,7 +371,7 @@ const Portfolio = () => {
             <div className="hero-text">
               <div className="hero-intro">
                 <span className="greeting">Hello, I'm</span>
-                <h1 className="hero-title">Miss Ko Na Siya</h1>
+                <h1 className="hero-title">Ryan Lumbis</h1>
                 <div className="hero-subtitle">
                   <span className="typed-text">
                     {typedText}
@@ -441,17 +472,17 @@ const Portfolio = () => {
               </p>
             </div>
             <div className="fade-in service-card">
-              <div className="service-icon">📱</div>
-              <h3 className="service-title">Mobile Development</h3>
+              <div className="service-icon">🎮</div>
+              <h3 className="service-title">Roblox Developer</h3>
               <p className="service-description">
-                Creating cross-platform mobile applications with React Native and Flutter, focusing on user experience and performance optimization.
+                Creating engaging Roblox games and experiences with Lua scripting, focusing on game mechanics and user interaction.
               </p>
             </div>
             <div className="fade-in service-card">
-              <div className="service-icon">🤖</div>
-              <h3 className="service-title">AI & Machine Learning</h3>
+              <div className="service-icon">🎨</div>
+              <h3 className="service-title">UX/UI Designer</h3>
               <p className="service-description">
-                Exploring artificial intelligence and machine learning concepts, implementing algorithms, and building intelligent applications with Python and TensorFlow.
+                Designing intuitive user interfaces and experiences with modern design principles and user-centered approaches.
               </p>
             </div>
           </div>
