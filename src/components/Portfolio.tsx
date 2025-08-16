@@ -32,12 +32,14 @@ const Portfolio = () => {
   const deletingSpeed = 40; // milliseconds per character (faster deletion)
   const pauseTime = 2000; // 3 seconds pause
 
-  // Define your skills data
+  // Define your skills data with descriptions
   const skills = [
-    { name: "HTML/CSS", level: 95, icon: "fab fa-html5" },
-    { name: "JavaScript", level: 88, icon: "fab fa-js" },
-    { name: "React", level: 85, icon: "fab fa-react" },
-    { name: "GIT", level: 90, icon: "fab fa-git-alt" }
+    { name: "HTML/CSS", level: 95, icon: "fab fa-html5", description: "Modern web development with responsive design" },
+    { name: "JavaScript", level: 88, icon: "fab fa-js", description: "Dynamic web applications and interactive features" },
+    { name: "React", level: 85, icon: "fab fa-react", description: "Component-based UI development" },
+    { name: "Lua", level: 92, icon: "fas fa-code", description: "Roblox game scripting and automation" },
+    { name: "Git", level: 90, icon: "fab fa-git-alt", description: "Version control and collaboration" },
+    { name: "UI/UX Design", level: 87, icon: "fas fa-palette", description: "User interface and experience design" }
   ];
 
   // Define project categories
@@ -431,25 +433,33 @@ const Portfolio = () => {
               <br />
               <p>I'm always learning — whether it's experimenting with UI libraries, exploring new tools like Vite or Tailwind CSS, or keeping up with the latest front-end trends. Outside of coding, I enjoy reading tech blogs, joining dev communities, and collaborating with others on meaningful projects.</p>
             </div>
-            <div className="fade-in skills-container">
+            <div className="fade-in skills-section">
               <h3 className="skills-title">Technical Skills</h3>
-              <div className="skills-graph">
-                {skills.map((skill, index) => (
-                  <div key={index} className="skill-item">
-                    <div className="skill-info">
-                      <div className="skill-name-with-icon">
-                        <i className={`${skill.icon} skill-icon`}></i>
-                        <span className="skill-name">{skill.name}</span>
+              <div className="skills-infinite-scroll">
+                <div className="skills-track">
+                  {/* First set of cards */}
+                  {skills.map((skill, index) => (
+                    <div key={`first-${index}`} className="skill-card">
+                      <div className="skill-card-icon">
+                        <i className={skill.icon}></i>
                       </div>
-                      <span className="skill-percentage">{skill.level}%</span>
-                    </div>
-                    <div className="skill-bar-container">
-                      <div className="skill-progress" data-percentage={skill.level}>
-                        <div className="skill-progress-glow"></div>
+                      <div className="skill-card-content">
+                        <h4 className="skill-card-title">{skill.name}</h4>
                       </div>
                     </div>
-                  </div>
-                ))}
+                  ))}
+                  {/* Duplicate set for seamless loop */}
+                  {skills.map((skill, index) => (
+                    <div key={`second-${index}`} className="skill-card">
+                      <div className="skill-card-icon">
+                        <i className={skill.icon}></i>
+                      </div>
+                      <div className="skill-card-content">
+                        <h4 className="skill-card-title">{skill.name}</h4>
+                      </div>
+                    </div>
+                  ))}
+                </div>
               </div>
             </div>
           </div>
