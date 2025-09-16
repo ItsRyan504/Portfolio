@@ -1,11 +1,10 @@
-import React from 'react';
-import Portfolio from './components/Portfolio';
-import './App.css';
+import './App.css'
+import Portfolio from './components/Portfolio'
 
 function App() {
   return (
     <Portfolio />
-  );
+  )
 }
 
-export default App;
+export default App

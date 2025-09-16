@@ -1,7 +1,10 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useMemo, useCallback, lazy, Suspense } from 'react';
 import { Parallax } from 'react-parallax';
 import './Portfolio.css';
 // Add Font Awesome CSS to index.html or import it here if using a package
+
+// Lazy load components for better performance
+const ProjectsSection = lazy(() => import('./ProjectsSection'));
 
 // Import your background images
 const bgImage = 'https://images.unsplash.com/photo-1635776062127-d379bfcba9f8?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2072&q=80';
@@ -9,15 +12,15 @@ const bgImage = 'https://images.unsplash.com/photo-1635776062127-d379bfcba9f8?ix
 const Portfolio = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
-  const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
+  const [activeCategory, setActiveCategory] = useState('all');
+  const [scrollDirection, setScrollDirection] = useState<'up' | 'down'>('up');
+  const [visibleSections, setVisibleSections] = useState<Set<string>>(new Set());
+  
+  // Refs
   const cursorRef = useRef<HTMLDivElement>(null);
   const cursorDotRef = useRef<HTMLDivElement>(null);
-  const heroRef = useRef<HTMLElement>(null);
-  const observerRef = useRef<IntersectionObserver | null>(null);
   const trailsRef = useRef<HTMLDivElement[]>([]);
-  const [activeCategory, setActiveCategory] = useState('all');
-  const [visibleSections, setVisibleSections] = useState<Set<string>>(new Set());
-  const [scrollDirection, setScrollDirection] = useState<'up' | 'down'>('down');
+  const heroRef = useRef<HTMLElement>(null);
   const lastScrollY = useRef(0);
   
   // Advanced typing animation state
@@ -33,25 +36,25 @@ const Portfolio = () => {
   const pauseTime = 2000; // 3 seconds pause
 
   // Define your skills data with descriptions
-  const skills = [
+  const skills = useMemo(() => [
     { name: "HTML/CSS", level: 95, icon: "fab fa-html5", description: "Modern web development with responsive design" },
     { name: "JavaScript", level: 88, icon: "fab fa-js", description: "Dynamic web applications and interactive features" },
     { name: "React", level: 85, icon: "fab fa-react", description: "Component-based UI development" },
     { name: "Lua", level: 92, icon: "fas fa-code", description: "Roblox game scripting and automation" },
     { name: "Git", level: 90, icon: "fab fa-git-alt", description: "Version control and collaboration" },
     { name: "UI/UX Design", level: 87, icon: "fas fa-palette", description: "User interface and experience design" }
-  ];
+  ], []);
 
   // Define project categories
-  const categories = [
+  const categories = useMemo(() => [
     { id: 'all', name: 'All' },
     { id: 'react', name: 'React' },
     { id: 'java', name: 'Java' },
     { id: 'html', name: 'HTML/CSS' },
-  ];
+  ], []);
 
   // Define projects with categories
-  const projects = [
+  const projects = useMemo(() => [
     {
       title: "MK Inventory Ledger",
       description: "A React-based inventory system that helps stores track expenses, stocks, and sales.",
@@ -73,31 +76,34 @@ const Portfolio = () => {
       category: "html",
       link: "#"
     }
-  ];
+  ], []);
 
   // Filter projects based on active category
-  const filteredProjects = activeCategory === 'all' 
-    ? [...projects] 
-    : projects.filter(project => project.category === activeCategory);
+  const filteredProjects = useMemo(() => 
+    activeCategory === 'all' 
+      ? [...projects] 
+      : projects.filter(project => project.category === activeCategory),
+    [activeCategory, projects]
+  );
 
   // Handle scroll for header transparency
-  useEffect(() => {
-    const handleScroll = () => {
-      setIsScrolled(window.scrollY > 50);
-    };
-
-    window.addEventListener('scroll', handleScroll);
-    return () => window.removeEventListener('scroll', handleScroll);
+  const handleScroll = useCallback(() => {
+    setIsScrolled(window.scrollY > 50);
   }, []);
 
+  useEffect(() => {
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, [handleScroll]);
+
   // Handle smooth scrolling
-  const scrollToSection = (sectionId: string) => {
+  const scrollToSection = useCallback((sectionId: string) => {
     const element = document.getElementById(sectionId);
     if (element) {
       element.scrollIntoView({ behavior: 'smooth' });
     }
     setIsMenuOpen(false);
-  };
+  }, []);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -232,38 +238,36 @@ const Portfolio = () => {
   }, [typedText, isTyping, isDeleting, currentTextIndex, displayTime, texts, typingSpeed, deletingSpeed, pauseTime]);
 
   // Handle cursor movement and trail effect
-  useEffect(() => {
-    const handleMouseMove = (e: MouseEvent) => {
-      setMousePosition({ x: e.clientX, y: e.clientY });
-      
-      // Update main cursor
-      if (cursorRef.current && cursorDotRef.current) {
-        cursorRef.current.style.transform = `translate(${e.clientX - 10}px, ${e.clientY - 10}px)`;
-        cursorDotRef.current.style.transform = `translate(${e.clientX - 2}px, ${e.clientY - 2}px)`;
-      }
+  const handleMouseMove = useCallback((e: MouseEvent) => {
+    // Update main cursor
+    if (cursorRef.current && cursorDotRef.current) {
+      cursorRef.current.style.transform = `translate(${e.clientX - 10}px, ${e.clientY - 10}px)`;
+      cursorDotRef.current.style.transform = `translate(${e.clientX - 2}px, ${e.clientY - 2}px)`;
+    }
 
-      // Create trail effect
-      const trail = document.createElement('div');
-      trail.className = 'cursor-trail';
-      trail.style.left = `${e.clientX - 3}px`;
-      trail.style.top = `${e.clientY - 3}px`;
-      document.body.appendChild(trail);
+    // Create trail effect
+    const trail = document.createElement('div');
+    trail.className = 'cursor-trail';
+    trail.style.left = `${e.clientX - 3}px`;
+    trail.style.top = `${e.clientY - 3}px`;
+    document.body.appendChild(trail);
 
-      // Store trail element reference
-      trailsRef.current.push(trail);
+    // Store trail element reference
+    trailsRef.current.push(trail);
 
-      // Remove trail after animation
+    // Remove trail after animation
+    setTimeout(() => {
+      trail.style.opacity = '0';
       setTimeout(() => {
-        trail.style.opacity = '0';
-        setTimeout(() => {
-          if (trail && trail.parentElement) {
-            trail.parentElement.removeChild(trail);
-            trailsRef.current = trailsRef.current.filter(t => t !== trail);
-          }
-        }, 300);
-      }, 100);
-    };
+        if (trail && trail.parentElement) {
+          trail.parentElement.removeChild(trail);
+          trailsRef.current = trailsRef.current.filter(t => t !== trail);
+        }
+      }, 300);
+    }, 100);
+  }, []);
 
+  useEffect(() => {
     document.addEventListener('mousemove', handleMouseMove);
     return () => {
       document.removeEventListener('mousemove', handleMouseMove);
@@ -275,10 +279,10 @@ const Portfolio = () => {
       });
       trailsRef.current = [];
     };
-  }, []);
+  }, [handleMouseMove]);
 
   // Form submission handler
-  const handleFormSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+  const handleFormSubmit = useCallback((e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     const formData = new FormData(e.currentTarget);
     const name = formData.get('name');
@@ -291,7 +295,7 @@ const Portfolio = () => {
     } else {
       alert('Please fill in all fields.');
     }
-  };
+  }, []);
 
   // Create particles for hero section
   useEffect(() => {
@@ -322,9 +326,9 @@ const Portfolio = () => {
   }, []);
 
   // Handle category change
-  const handleCategoryChange = (categoryId: string) => {
+  const handleCategoryChange = useCallback((categoryId: string) => {
     setActiveCategory(categoryId);
-  };
+  }, []);
 
   return (
     <div className="portfolio">
@@ -337,7 +341,7 @@ const Portfolio = () => {
         <div className="container">
           <nav className="nav">
             <div className="logo">
-              <span>Portfolio</span>
+              <span>RiaZure</span>
             </div>
             <ul className={`nav-links ${isMenuOpen ? 'active' : ''}`}>
               <li><a href="#home" onClick={() => scrollToSection('home')} className="nav-link">Home</a></li>
@@ -399,7 +403,7 @@ const Portfolio = () => {
             </div>
             <div className="hero-image">
               <div className="profile-image">
-                <img src="/src/imgs/toge.png" alt="Your Name" className="profile-photo" />
+                <img src="/src/imgs/profile.jpg" alt="Your Name" className="profile-photo" loading="lazy" />
                 <div className="image-decoration"></div>
               </div>
               <div className="tech-stack">
@@ -500,49 +504,16 @@ const Portfolio = () => {
       </section>
 
       {/* Projects Section */}
-      <section 
-        id="projects" 
-        className={`projects ${visibleSections.has('projects') ? 'visible' : ''} ${scrollDirection === 'up' ? 'scroll-up' : ''}`}
-      >
-        <div className="container">
-          <h2 className="fade-in section-title">Featured Projects</h2>
-          <div className="project-categories">
-            {categories.map(category => (
-              <button
-                key={category.id}
-                className={`category-btn ${activeCategory === category.id ? 'active' : ''}`}
-                onClick={() => handleCategoryChange(category.id)}
-              >
-                {category.name}
-              </button>
-            ))}
-          </div>
-          <div className="projects-grid">
-            {filteredProjects.map((project, index) => (
-              <div key={index} className="fade-in project-card">
-                <div className="project-image">
-                  {project.image.startsWith('/') ? (
-                    <img src={project.image} alt={project.title} className="project-img" />
-                  ) : (
-                    <div className="project-placeholder">{project.image}</div>
-                  )}
-                </div>
-                <div className="project-content">
-                  <h3 className="project-title">{project.title}</h3>
-                  <p className="project-description">{project.description}</p>
-                  <a href={project.link} className="project-link">View Project →</a>
-                </div>
-              </div>
-            ))}
-            {/* Add empty cards to maintain grid layout when filtered */}
-            {filteredProjects.length % 3 !== 0 && 
-              Array.from({ length: 3 - (filteredProjects.length % 3) }).map((_, index) => (
-                <div key={`empty-${index}`} className="project-card empty" style={{ visibility: 'hidden' }}></div>
-              ))
-            }
-          </div>
-        </div>
-      </section>
+      <Suspense fallback={<div>Loading...</div>}>
+        <ProjectsSection
+          activeCategory={activeCategory}
+          handleCategoryChange={handleCategoryChange}
+          filteredProjects={filteredProjects}
+          categories={categories}
+          scrollDirection={scrollDirection}
+          visibleSections={visibleSections}
+        />
+      </Suspense>
 
       {/* Contact Section with improved styling */}
       <section 
