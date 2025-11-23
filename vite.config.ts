@@ -4,6 +4,7 @@ import { resolve } from 'node:path'
 
 // https://vite.dev/config/
 export default defineConfig({
+  base: '/Portfolio/',
   plugins: [react()],
   build: {
     target: 'es2015',

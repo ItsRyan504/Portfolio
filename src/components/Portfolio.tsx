@@ -424,7 +424,7 @@ const Portfolio = () => {
             </div>
             <div className="hero-image">
               <div className="profile-image">
-                <img src="/src/imgs/profile.jpg" alt="Your Name" className="profile-photo" loading="lazy" />
+                <img src="/src/imgs/face.jpg" alt="Your Name" className="profile-photo" loading="lazy" />
                 <div className="image-decoration"></div>
               </div>
               <div className="tech-stack">
