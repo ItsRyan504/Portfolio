@@ -9,6 +9,8 @@ const ProjectsSection = lazy(() => import('./ProjectsSection'));
 // Import your background images
 const bgImage = 'https://images.unsplash.com/photo-1635776062127-d379bfcba9f8?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2072&q=80';
 
+const CONTACT_EMAIL = 'itsryan504@gmail.com';
+
 const Portfolio = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
@@ -52,6 +54,7 @@ const Portfolio = () => {
     { id: 'java', name: 'Java' },
     { id: 'html', name: 'HTML/CSS' },
     { id: 'flutter', name: 'Flutter' },
+    { id: 'discord', name: 'Discord Bots' },
   ], []);
 
   // Define projects with categories
@@ -59,8 +62,15 @@ const Portfolio = () => {
     {
       title: "Striktnanay",
       description: "A Flutter checklist with an integrated Pomodoro timer that helped 75% of student testers stay productive.",
-      image: "https://images.unsplash.com/photo-1508780709619-79562169bc64?auto=format&fit=crop&w=800&q=80",
+      image: "/src/imgs/striktnanay.png",
       category: "flutter",
+      link: "#"
+    },
+    {
+      title: "Discord Queue Bot & Gamepass Scanner",
+      description: "Custom bot that manages order ticket queues for transparency plus a Roblox gamepass scanner to validate purchases in real time.",
+      image: "/src/imgs/discord.jpeg",
+      category: "discord",
       link: "#"
     },
     {
@@ -297,8 +307,11 @@ const Portfolio = () => {
     const email = formData.get('email');
     const message = formData.get('message');
     
-    if (name && email && message) {
-      alert("Thank you for your message! I'll get back to you soon.");
+    if (typeof name === 'string' && typeof email === 'string' && typeof message === 'string') {
+      const subject = encodeURIComponent(`Portfolio Inquiry from ${name}`);
+      const body = encodeURIComponent(`Name: ${name}\nEmail: ${email}\n\n${message}`);
+      window.location.href = `mailto:${CONTACT_EMAIL}?subject=${subject}&body=${body}`;
+      alert("Thanks! Your email client should open with the details filled in.");
       e.currentTarget.reset();
     } else {
       alert('Please fill in all fields.');
@@ -587,7 +600,7 @@ const Portfolio = () => {
             <a href="https://www.instagram.com/mr.popsout" className="social-link" target="_blank" rel="noopener noreferrer">
               <i className="fab fa-instagram"></i>
             </a>
-            <a href="mailto:rml2023-7062-83277@bicol-u.edu.ph" className="social-link">
+            <a href={`mailto:${CONTACT_EMAIL}`} className="social-link">
               <i className="fas fa-envelope"></i>
             </a>
           </div>
