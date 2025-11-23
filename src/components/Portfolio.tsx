@@ -7,6 +7,7 @@ import inventoryImage from '../imgs/Inventory-Management.png';
 import eventManagementImage from '../imgs/Event-Management.png';
 import robuxStoreImage from '../imgs/Robux-Store.png';
 import faceImage from '../imgs/face.jpg';
+import cvPdf from '../assets/CV.pdf';
 // Add Font Awesome CSS to index.html or import it here if using a package
 
 // Lazy load components for better performance
@@ -60,7 +61,7 @@ const Portfolio = () => {
     { id: 'java', name: 'Java' },
     { id: 'html', name: 'HTML/CSS' },
     { id: 'flutter', name: 'Flutter' },
-    { id: 'discord', name: 'Discord Bots' },
+    { id: 'python', name: 'Python' },
   ], []);
 
   // Define projects with categories
@@ -73,10 +74,17 @@ const Portfolio = () => {
       link: "#"
     },
     {
-      title: "Discord Queue Bot & Gamepass Scanner",
-      description: "Custom bot that manages order ticket queues for transparency plus a Roblox gamepass scanner to validate purchases in real time.",
+      title: "Discord Queue Bot",
+      description: "Python automation that manages Discord order queues with transparency, making the DC shop 68% more efficient during drops.",
       image: discordImage,
-      category: "discord",
+      category: "python",
+      link: "#"
+    },
+    {
+      title: "Roblox Gamepass Scanner",
+      description: "Python-powered scanner that tracks Robux prices and gamepasses in real time, boosting scanning efficiency across the shop by 82%.",
+      image: discordImage,
+      category: "python",
       link: "#"
     },
     {
@@ -423,7 +431,7 @@ const Portfolio = () => {
                 <a href="#contact" onClick={() => scrollToSection('contact')} className="cta-button secondary">
                   Let's Talk
                 </a>
-                <a href="/assets/CV.pdf" className="cta-button cv-button" target="_blank" rel="noopener noreferrer">
+                <a href={cvPdf} className="cta-button cv-button" target="_blank" rel="noopener noreferrer">
                   Download CV
                 </a>
               </div>
