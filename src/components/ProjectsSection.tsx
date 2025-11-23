@@ -52,7 +52,7 @@ const ProjectsSection: React.FC<ProjectsSectionProps> = ({
           {filteredProjects.map((project, index) => (
             <div key={index} className="fade-in project-card">
               <div className="project-image">
-                {project.image.startsWith('/') ? (
+                {(project.image.startsWith('/') || project.image.startsWith('http')) ? (
                   <img src={project.image} alt={project.title} className="project-img" loading="lazy" />
                 ) : (
                   <div className="project-placeholder">{project.image}</div>

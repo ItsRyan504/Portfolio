@@ -51,10 +51,18 @@ const Portfolio = () => {
     { id: 'react', name: 'React' },
     { id: 'java', name: 'Java' },
     { id: 'html', name: 'HTML/CSS' },
+    { id: 'flutter', name: 'Flutter' },
   ], []);
 
   // Define projects with categories
   const projects = useMemo(() => [
+    {
+      title: "Striktnanay",
+      description: "A Flutter checklist with an integrated Pomodoro timer that helped 75% of student testers stay productive.",
+      image: "https://images.unsplash.com/photo-1508780709619-79562169bc64?auto=format&fit=crop&w=800&q=80",
+      category: "flutter",
+      link: "#"
+    },
     {
       title: "MK Inventory Ledger",
       description: "A React-based inventory system that helps stores track expenses, stocks, and sales.",
@@ -573,13 +581,13 @@ const Portfolio = () => {
             <a href="https://linkedin.com/in/yourprofile" className="social-link" target="_blank" rel="noopener noreferrer">
               <i className="fab fa-linkedin-in"></i>
             </a>
-            <a href="https://github.com/yourusername" className="social-link" target="_blank" rel="noopener noreferrer">
+            <a href="https://github.com/ItsRyan504" className="social-link" target="_blank" rel="noopener noreferrer">
               <i className="fab fa-github"></i>
             </a>
-            <a href="https://instagram.com/yourprofile" className="social-link" target="_blank" rel="noopener noreferrer">
+            <a href="https://www.instagram.com/mr.popsout" className="social-link" target="_blank" rel="noopener noreferrer">
               <i className="fab fa-instagram"></i>
             </a>
-            <a href="mailto:your.email@example.com" className="social-link">
+            <a href="mailto:rml2023-7062-83277@bicol-u.edu.ph" className="social-link">
               <i className="fas fa-envelope"></i>
             </a>
           </div>
