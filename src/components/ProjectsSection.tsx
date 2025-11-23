@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { createPortal } from 'react-dom';
 
 interface Project {
   title: string;
@@ -121,7 +122,7 @@ const ProjectsSection: React.FC<ProjectsSectionProps> = ({
             ))
           }
         </div>
-        {activeImage && (
+        {activeImage && typeof document !== 'undefined' && createPortal(
           <div className="project-modal-backdrop" onClick={closeModal} role="presentation">
             <div
               className="project-modal"
@@ -136,7 +137,8 @@ const ProjectsSection: React.FC<ProjectsSectionProps> = ({
               <img src={activeImage} alt={activeTitle} className="project-modal-image" />
               <p className="project-modal-caption">{activeTitle}</p>
             </div>
-          </div>
+          </div>,
+          document.body
         )}
       </div>
     </section>
