@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 
 interface Project {
@@ -33,11 +33,33 @@ const ProjectsSection: React.FC<ProjectsSectionProps> = ({
 }) => {
   const [activeImage, setActiveImage] = useState<string | null>(null);
   const [activeTitle, setActiveTitle] = useState('');
+  const [isClosing, setIsClosing] = useState(false);
+  const closeTimeoutRef = useRef<number | null>(null);
 
   const closeModal = () => {
-    setActiveImage(null);
-    setActiveTitle('');
+    if (!activeImage || isClosing) {
+      return;
+    }
+
+    setIsClosing(true);
+    if (closeTimeoutRef.current) {
+      window.clearTimeout(closeTimeoutRef.current);
+    }
+    closeTimeoutRef.current = window.setTimeout(() => {
+      setActiveImage(null);
+      setActiveTitle('');
+      setIsClosing(false);
+      closeTimeoutRef.current = null;
+    }, 250);
   };
+
+  useEffect(() => {
+    return () => {
+      if (closeTimeoutRef.current) {
+        window.clearTimeout(closeTimeoutRef.current);
+      }
+    };
+  }, []);
 
   useEffect(() => {
     if (!activeImage) {
@@ -102,9 +124,14 @@ const ProjectsSection: React.FC<ProjectsSectionProps> = ({
                   type="button"
                   className="project-link"
                   onClick={() => {
+                    if (closeTimeoutRef.current) {
+                      window.clearTimeout(closeTimeoutRef.current);
+                      closeTimeoutRef.current = null;
+                    }
                     if (project.image.startsWith('/') || project.image.startsWith('http')) {
                       setActiveImage(project.image);
                       setActiveTitle(project.title);
+                      setIsClosing(false);
                     } else if (project.link) {
                       window.open(project.link, '_blank');
                     }
@@ -123,9 +150,13 @@ const ProjectsSection: React.FC<ProjectsSectionProps> = ({
           }
         </div>
         {activeImage && typeof document !== 'undefined' && createPortal(
-          <div className="project-modal-backdrop" onClick={closeModal} role="presentation">
+          <div
+            className={`project-modal-backdrop ${isClosing ? 'closing' : 'opening'}`}
+            onClick={closeModal}
+            role="presentation"
+          >
             <div
-              className="project-modal"
+              className={`project-modal ${isClosing ? 'closing' : 'opening'}`}
               role="dialog"
               aria-modal="true"
               aria-label={`${activeTitle} preview`}
