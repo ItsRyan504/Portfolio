@@ -1,6 +1,12 @@
 import React, { useState, useEffect, useRef, useMemo, useCallback, lazy, Suspense } from 'react';
 import { Parallax } from 'react-parallax';
 import './Portfolio.css';
+import striktnanayImage from '../imgs/striktnanay.png';
+import discordImage from '../imgs/discord.jpeg';
+import inventoryImage from '../imgs/Inventory-Management.png';
+import eventManagementImage from '../imgs/Event-Management.png';
+import robuxStoreImage from '../imgs/Robux-Store.png';
+import faceImage from '../imgs/face.jpg';
 // Add Font Awesome CSS to index.html or import it here if using a package
 
 // Lazy load components for better performance
@@ -9,7 +15,7 @@ const ProjectsSection = lazy(() => import('./ProjectsSection'));
 // Import your background images
 const bgImage = 'https://images.unsplash.com/photo-1635776062127-d379bfcba9f8?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2072&q=80';
 
-const CONTACT_EMAIL = 'itsryan504@gmail.com';
+const CONTACT_EMAIL = 'rml2023-7602-83277@bicol-u.edu.ph';
 
 const Portfolio = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -62,35 +68,35 @@ const Portfolio = () => {
     {
       title: "Striktnanay",
       description: "A Flutter checklist with an integrated Pomodoro timer that helped 75% of student testers stay productive.",
-      image: "/src/imgs/striktnanay.png",
+      image: striktnanayImage,
       category: "flutter",
       link: "#"
     },
     {
       title: "Discord Queue Bot & Gamepass Scanner",
       description: "Custom bot that manages order ticket queues for transparency plus a Roblox gamepass scanner to validate purchases in real time.",
-      image: "/src/imgs/discord.jpeg",
+      image: discordImage,
       category: "discord",
       link: "#"
     },
     {
       title: "MK Inventory Ledger",
       description: "A React-based inventory system that helps stores track expenses, stocks, and sales.",
-      image: "/src/imgs/Inventory-Management.png",
+      image: inventoryImage,
       category: "react",
       link: "#"
     },
     {
       title: "Event Management System",
       description: "A Java application to help users track and manage their upcoming events.",
-      image: "/src/imgs/Event-Management.png",
+      image: eventManagementImage,
       category: "java",
       link: "#"
     },
     {
       title: "Robux Store",
       description: "A website built with HTML/CSS for displaying pricelists in Robux and gamepasses.",
-      image: "/src/imgs/Robux-Store.png",
+      image: robuxStoreImage,
       category: "html",
       link: "#"
     }
@@ -417,14 +423,14 @@ const Portfolio = () => {
                 <a href="#contact" onClick={() => scrollToSection('contact')} className="cta-button secondary">
                   Let's Talk
                 </a>
-                <a href="/path-to-your-cv.pdf" className="cta-button cv-button" target="_blank" rel="noopener noreferrer">
+                <a href="/assets/CV.pdf" className="cta-button cv-button" target="_blank" rel="noopener noreferrer">
                   Download CV
                 </a>
               </div>
             </div>
             <div className="hero-image">
               <div className="profile-image">
-                <img src="/src/imgs/face.jpg" alt="Your Name" className="profile-photo" loading="lazy" />
+                <img src={faceImage} alt="Your Name" className="profile-photo" loading="lazy" />
                 <div className="image-decoration"></div>
               </div>
               <div className="tech-stack">
